@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FindMyFrame</title>
+    <link rel="icon" href="https://i.ibb.co/rkbH3HY/icon.png" type="image/png">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: #333;
+            background: linear-gradient(to right, #ff7e5f, #feb47b);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .appHeader {
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .appHeader .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+
+        .appHeader .logo img {
+            height: 50px;
+        }
+
+        .appHeader .nav {
+            display: flex;
+            gap: 15px;
+        }
+
+        .appHeader .nav a {
+            color: #007BFF;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .appHeader .auth-buttons {
+            display: flex;
+        }
+
+        .appHeader .auth-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 1em;
+        }
+
+        .appHeader .auth-buttons .login {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .appHeader .auth-buttons .signup {
+            background-color: #007BFF;
+            color: #fff;
+        }
+
+        .appHeader .auth-buttons .login:hover {
+            background-color: #e2e6ea;
+        }
+
+        .appHeader .auth-buttons .signup:hover {
+            background-color: #0056b3;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .content h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .content h2 {
+            font-size: 1.8em;
+            color: #eee;
+        }
+
+        .drag-drop {
+            width: 100%;
+            max-width: 500px;
+            height: 200px;
+            border: 2px dashed #007BFF;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            margin-bottom: 20px;
+            position: relative;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+
+        .drag-drop.dragging {
+            background-color: #f0f8ff;
+        }
+
+        .drag-drop p {
+            margin: 0;
+            font-size: 1.2em;
+            color: #007BFF;
+        }
+
+        .drag-drop input[type="file"] {
+            display: none;
+        }
+
+        #file-name {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .btn-upload-process {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-upload-process button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            color: #fff;
+        }
+
+        .btn-upload-process .upload-btn {
+            background-color: #007BFF;
+        }
+
+        .btn-upload-process .process-btn {
+            background-color: #28a745;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 20px;
+            color: #fff;
+            font-size: 1.2em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            max-width: 500px;
+            background-color: #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar div {
+            height: 10px;
+            background-color: #007BFF;
+            width: 0;
+            transition: width 0.3s;
+        }
+
+        #download-link {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .appFooter {
+            background: #fff;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #ddd;
+        }
+
+        .appFooter .legal-info a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        .appFooter .legal-info a:hover {
+            text-decoration: underline;
+        }
+
+        .processing-options {
+            display: none;
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .processing-options label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .processing-options input[type="number"],
+        .processing-options select {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+
+        .reset-btn {
+            background-color: #dc3545;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 20px;
+        }
+
+        .reset-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* New styles for the modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Changed from auto to hidden */
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #000;
+            margin: 5% auto; /* Changed from 15% to 5% to give more space */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            height: 80%; /* Added fixed height */
+            overflow-y: auto; /* Added scroll for content */
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #0f0;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .matrix-char {
+            position: absolute;
+            font-size: 20px;
+            color: #0f0;
+        }
+
+        #player {
+            width: 20px;
+            height: 20px;
+            background-color: #0f0;
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+        }
+
+        .developer-info {
+            text-align: center;
+        }
+
+        .developer-info img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="appHeader">
+        <div class="logo">
+            <img src="https://i.ibb.co/GHHsmLp/logo.png" alt="ExtractFrame">
+        </div>
+    </header>
+
+    <div class="content">
+        <h1>Upload Your Video</h1>
+        <h2>We will process it and provide you with downloadable frames</h2>
+        <div class="drag-drop" id="drop-area">
+            <input id="file-upload" type="file" accept="video/*">
+            <p>Drag & Drop Your Video Here or Click to Choose</p>
+        </div>
+        <div id="file-name"></div>
+        <div class="btn-upload-process">
+            <button id="upload-btn" class="upload-btn">Upload</button>
+            <button id="process-btn" class="process-btn" style="display: none;">Process</button>
+        </div>
+        <div class="processing-options" id="processing-options">
+            <label for="frames-per-second">Frames per second to extract:</label>
+            <input type="number" id="frames-per-second" min="1" max="30" value="1">
+            <label for="frame-order">Frame order:</label>
+            <select id="frame-order">
+                <option value="sequential">Sequential</option>
+                <option value="shuffle">Random (1 per second)</option>
+            </select>
+        </div>
+        <div id="loading" class="loading">Processing, please wait...</div>
+        <div id="progress-bar" class="progress-bar">
+            <div id="progress"></div>
+        </div>
+        <a id="download-link" href="#" download>Download Processed Frames</a>
+        <button id="reset-btn" class="reset-btn" style="display: none;">Reset</button>
+    </div>
+
+    <footer class="appFooter">
+        <div class="legal-info">
+            <p>&copy; 2024 ExtractFrame. All rights reserved. <a href="#" id="about-developer">About Developer</a></p>
+        </div>
+    </footer>
+
+    <!-- New modal for About Developer -->
+    <div id="developer-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Matrix Dodge</h2>
+            <div id="game-container">
+                <div id="player"></div>
+            </div>
+            <p>Use left and right arrow keys to dodge the falling characters!</p>
+            <div class="developer-info">
+                <img src="https://i.ibb.co/rkbH3HY/icon.png" alt="Developer">
+                <h3>John Doe</h3>
+                <p>Passionate developer and Matrix enthusiast</p>
+                <a href="https://github.com/johndoe" target="_blank">GitHub Profile</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-upload');
+        const dropArea = document.getElementById('drop-area');
+        const fileName = document.getElementById('file-name');
+        const uploadBtn = document.getElementById('upload-btn');
+        const processBtn = document.getElementById('process-btn');
+        const processingOptions = document.getElementById('processing-options');
+        const framesPerSecond = document.getElementById('frames-per-second');
+        const frameOrder = document.getElementById('frame-order');
+        const loading = document.getElementById('loading');
+        const progressBar = document.getElementById('progress-bar');
+        const progress = document.getElementById('progress');
+        const downloadLink = document.getElementById('download-link');
+        const resetBtn = document.getElementById('reset-btn');
+
+        let selectedFile = null;
+        let uploadedFileId = null;
+
+        dropArea.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', handleFileSelect);
+        dropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropArea.classList.add('dragging');
+        });
+        dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragging'));
+        dropArea.addEventListener('drop', handleFileDrop);
+
+        function handleFileSelect(event) {
+            selectedFile = event.target.files[0];
+            updateFileInfo();
+        }
+
+        function handleFileDrop(event) {
+            event.preventDefault();
+            dropArea.classList.remove('dragging');
+            selectedFile = event.dataTransfer.files[0];
+            updateFileInfo();
+        }
+
+        function updateFileInfo() {
+            if (selectedFile) {
+                fileName.textContent = `Selected file: ${selectedFile.name}`;
+                uploadBtn.style.display = 'inline-block';
+                processBtn.style.display = 'none';
+                processingOptions.style.display = 'none';
+                dropArea.style.display = 'none';
+            } else {
+                fileName.textContent = '';
+                uploadBtn.style.display = 'none';
+                processBtn.style.display = 'none';
+                processingOptions.style.display = 'none';
+                dropArea.style.display = 'flex';
+            }
+        }
+
+        uploadBtn.addEventListener('click', uploadFile);
+        processBtn.addEventListener('click', processVideo);
+        resetBtn.addEventListener('click', resetApplication);
+
+        function uploadFile() {
+            if (!selectedFile) return;
+
+            const formData = new FormData();
+            formData.append('video', selectedFile);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        uploadBtn.style.display = 'none';
+                        processingOptions.style.display = 'block';
+                        processBtn.style.display = 'inline-block';
+                        uploadedFileId = data.id;
+
+                        // Update max FPS in the UI
+                        framesPerSecond.max = data.maxFps;
+                        framesPerSecond.value = Math.min(framesPerSecond.value, data.maxFps);
+
+                        // Display max FPS
+                        const maxFpsInfo = document.createElement('p');
+                        maxFpsInfo.textContent = `Maximum frame rate: ${data.maxFps} fps`;
+                        processingOptions.insertBefore(maxFpsInfo, processingOptions.firstChild);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred during upload.');
+                });
+        }
+
+        function processVideo() {
+            if (!uploadedFileId) return;
+
+            const settings = {
+                id: uploadedFileId,
+                framesPerSecond: parseInt(framesPerSecond.value),
+                shuffle: frameOrder.value === 'shuffle'
+            };
+
+            fetch('/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(settings)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        loading.style.display = 'block';
+                        progressBar.style.display = 'block';
+                        processBtn.style.display = 'none';
+                        processingOptions.style.display = 'none';
+                        checkProgress();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while starting the process.');
+                });
+        }
+
+        function checkProgress() {
+            fetch(`/progress/${uploadedFileId}`)
+                .then(response => response.json())
+                .then(data => {
+                    progress.style.width = `${data.progress}%`;
+                    if (data.progress < 100) {
+                        setTimeout(checkProgress, 1000);
+                    } else {
+                        loading.style.display = 'none';
+                        downloadLink.href = `/download/${uploadedFileId}`;
+                        downloadLink.style.display = 'inline-block';
+                        resetBtn.style.display = 'inline-block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while checking progress.');
+                });
+        }
+
+        function resetApplication() {
+            selectedFile = null;
+            uploadedFileId = null;
+            fileInput.value = '';
+            fileName.textContent = '';
+            uploadBtn.style.display = 'none';
+            processBtn.style.display = 'none';
+            processingOptions.style.display = 'none';
+            loading.style.display = 'none';
+            progressBar.style.display = 'none';
+            progress.style.width = '0';
+            downloadLink.style.display = 'none';
+            resetBtn.style.display = 'none';
+            dropArea.style.display = 'flex';
+
+            // Remove max FPS info if it exists
+            const maxFpsInfo = processingOptions.querySelector('p');
+            if (maxFpsInfo) {
+                maxFpsInfo.remove();
+            }
+        }
+
+        // New JavaScript for the modal and game
+        const modal = document.getElementById("developer-modal");
+        const btn = document.getElementById("about-developer");
+        const span = document.getElementsByClassName("close")[0];
+        const gameContainer = document.getElementById("game-container");
+        const player = document.getElementById("player");
+
+        btn.onclick = function () {
+            modal.style.display = "block";
+            startGame();
+        }
+
+        span.onclick = function () {
+            modal.style.display = "none";
+            stopGame();
+        }
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+                stopGame();
+            }
+        }
+
+        let gameInterval;
+        let isGameRunning = false;
+
+        function startGame() {
+            if (!isGameRunning) {
+                player.style.left = "50%";
+                gameInterval = setInterval(createMatrixChar, 500);
+                document.addEventListener("keydown", movePlayer);
+                isGameRunning = true;
+            }
+        }
+
+        function stopGame() {
+            if (isGameRunning) {
+                clearInterval(gameInterval);
+                document.removeEventListener("keydown", movePlayer);
+                gameContainer.innerHTML = '<div id="player"></div>';
+                isGameRunning = false;
+            }
+        }
+        btn.onclick = function() {
+            modal.style.display = "block";
+            startGame();
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+            stopGame();
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+                stopGame();
+            }
+        }
+        function createMatrixChar() {
+            const char = document.createElement("div");
+            char.classList.add("matrix-char");
+            char.style.left = Math.random() * (gameContainer.offsetWidth - 20) + "px";
+            char.style.top = "0px";
+            char.textContent = String.fromCharCode(33 + Math.floor(Math.random() * 94));
+            gameContainer.appendChild(char);
+
+            let fall = setInterval(() => {
+                let top = parseInt(char.style.top) || 0;
+                if (top >= gameContainer.offsetHeight) {
+                    clearInterval(fall);
+                    char.remove();
+                } else {
+                    char.style.top = (top + 2) + "px";
+                }
+            }, 20);
+        }
+
+        function movePlayer(e) {
+            let left = player.offsetLeft;
+            if (e.key === "ArrowLeft" && left > 0) {
+                player.style.left = (left - 10) + "px";
+            } else if (e.key === "ArrowRight" && left < gameContainer.offsetWidth - player.offsetWidth) {
+                player.style.left = (left + 10) + "px";
+            }
+        }
+    </script>
+</body>
+
+</html>
